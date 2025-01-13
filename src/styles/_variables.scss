@@ -1,0 +1,26 @@
+// Colors
+$primary-color: #1a1a1a;
+$secondary-color: #535bf2;
+$background-dark: #121212;
+$text-primary: #ffffff;
+$text-secondary: rgba(255, 255, 255, 0.7);
+$error-color: #ff4444;
+$success-color: #00c851;
+
+// Breakpoints
+$mobile: 576px;
+$tablet: 768px;
+$desktop: 1024px;
+
+// Spacing
+$spacing-xs: 0.25rem;
+$spacing-sm: 0.5rem;
+$spacing-md: 1rem;
+$spacing-lg: 1.5rem;
+$spacing-xl: 2rem;
+
+// Typography
+$font-family-base: 'Inter', system-ui, -apple-system, sans-serif;
+$font-size-base: 1rem;
+$font-size-sm: 0.875rem;
+$font-size-lg: 1.25rem;

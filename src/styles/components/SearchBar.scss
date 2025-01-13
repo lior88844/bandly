@@ -1,0 +1,79 @@
+@import '../variables';
+
+.search-bar {
+  background: rgba($primary-color, 0.5);
+  padding: $spacing-lg;
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba($text-primary, 0.1);
+
+  &__main {
+    display: flex;
+    gap: $spacing-md;
+    margin-bottom: $spacing-md;
+
+    .button {
+      min-width: 120px;
+    }
+  }
+
+  &__input {
+    flex: 1;
+    padding: $spacing-sm $spacing-md;
+    background: rgba($text-primary, 0.1);
+    border: 1px solid rgba($text-primary, 0.2);
+    border-radius: 4px;
+    color: $text-primary;
+    font-size: $font-size-base;
+
+    &:focus {
+      outline: none;
+      border-color: $secondary-color;
+    }
+
+    &::placeholder {
+      color: $text-secondary;
+    }
+  }
+
+  &__filters {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: $spacing-md;
+  }
+
+  &__select {
+    width: 100%;
+    padding: $spacing-sm;
+    background: rgba($text-primary, 0.1);
+    border: 1px solid rgba($text-primary, 0.2);
+    border-radius: 4px;
+    color: $text-primary;
+    font-size: $font-size-base;
+    cursor: pointer;
+
+    &:focus {
+      outline: none;
+      border-color: $secondary-color;
+    }
+
+    option {
+      background: $primary-color;
+      color: $text-primary;
+    }
+  }
+
+  @media (max-width: $mobile) {
+    &__main {
+      flex-direction: column;
+
+      .button {
+        width: 100%;
+      }
+    }
+
+    &__filters {
+      grid-template-columns: 1fr;
+    }
+  }
+}
