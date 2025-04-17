@@ -4,13 +4,17 @@ export type InstrumentName = ReturnType<typeof getAllInstrumentNames>[number]
 export type GenreName = ReturnType<typeof getAllGenreNames>[number]
 
 export interface UserProfile {
-  id?: string
+  id: string
   username: string
   email: string
   location?: string
-  instrument?: InstrumentName
+  coordinates?: {
+    lat: number
+    lng: number
+  }
+  instrument?: string
   experience?: string
-  genres?: GenreName[]
+  genres?: string[]
   createdAt: string
 }
 

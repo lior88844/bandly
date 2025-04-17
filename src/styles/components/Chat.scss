@@ -1,0 +1,109 @@
+@import '../variables';
+
+.chat {
+  display: flex;
+  flex-direction: column;
+  height: 500px;
+  background: rgba($primary-color, 0.5);
+  border-radius: 8px;
+  overflow: hidden;
+
+  &__header {
+    padding: $spacing-md;
+    background: rgba($text-primary, 0.1);
+    border-bottom: 1px solid rgba($text-primary, 0.1);
+
+    h3 {
+      margin: 0;
+      color: $text-primary;
+    }
+  }
+
+  &__messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: $spacing-md;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+  }
+
+  &__message {
+    max-width: 70%;
+
+    &.sent {
+      align-self: flex-end;
+
+      .message-content {
+        background: rgba($secondary-color, 0.2);
+        border-radius: 12px 12px 0 12px;
+      }
+    }
+
+    &.received {
+      align-self: flex-start;
+
+      .message-content {
+        background: rgba($text-primary, 0.1);
+        border-radius: 12px 12px 12px 0;
+      }
+    }
+
+    .message-content {
+      padding: $spacing-sm $spacing-md;
+
+      .sender {
+        font-size: $font-size-sm;
+        color: $text-secondary;
+        margin-bottom: $spacing-xs;
+        display: block;
+      }
+
+      p {
+        margin: $spacing-xs 0;
+        color: $text-primary;
+      }
+
+      .timestamp {
+        font-size: $font-size-sm;
+        color: $text-secondary;
+        display: block;
+        text-align: right;
+      }
+    }
+  }
+
+  &__input {
+    padding: $spacing-md;
+    display: flex;
+    gap: $spacing-md;
+    background: rgba($text-primary, 0.05);
+    border-top: 1px solid rgba($text-primary, 0.1);
+
+    input {
+      flex: 1;
+      padding: $spacing-sm $spacing-md;
+      background: rgba($text-primary, 0.1);
+      border: 1px solid rgba($text-primary, 0.2);
+      border-radius: 4px;
+      color: $text-primary;
+      font-size: $font-size-base;
+
+      &:focus {
+        outline: none;
+        border-color: $secondary-color;
+      }
+    }
+
+    button {
+      min-width: 80px;
+    }
+  }
+
+  &__loading,
+  &__empty {
+    text-align: center;
+    color: $text-secondary;
+    padding: $spacing-xl;
+  }
+}

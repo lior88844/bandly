@@ -1,0 +1,113 @@
+@import '../variables';
+
+.messenger {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: $spacing-lg;
+  height: calc(100vh - 200px);
+  margin: -$spacing-xl;
+  background: $primary-color;
+
+  &__sidebar {
+    border-right: 1px solid rgba($text-primary, 0.1);
+    padding: $spacing-lg;
+    overflow-y: auto;
+
+    h2 {
+      margin-bottom: $spacing-lg;
+      color: $text-primary;
+    }
+  }
+
+  &__main {
+    padding: $spacing-lg;
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.conversation-list {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+}
+
+.conversation-item {
+  padding: $spacing-md;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover,
+  &.active {
+    background: rgba($text-primary, 0.1);
+  }
+
+  &__info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: $spacing-xs;
+
+    h3 {
+      color: $text-primary;
+      font-size: $font-size-base;
+      margin: 0;
+    }
+
+    .instrument {
+      font-size: $font-size-sm;
+      color: $secondary-color;
+      background: rgba($secondary-color, 0.1);
+      padding: $spacing-xs $spacing-sm;
+      border-radius: 4px;
+    }
+  }
+
+  &__last-message {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: $spacing-sm;
+
+    p {
+      color: $text-secondary;
+      font-size: $font-size-sm;
+      margin: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1;
+    }
+
+    .timestamp {
+      color: $text-secondary;
+      font-size: $font-size-sm;
+      white-space: nowrap;
+    }
+  }
+}
+
+.no-chat-selected {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: $text-secondary;
+  font-size: $font-size-lg;
+  text-align: center;
+}
+
+.loading,
+.empty,
+.error {
+  color: $text-secondary;
+  text-align: center;
+  padding: $spacing-xl;
+}
+
+.error {
+  background: rgba($error-color, 0.1);
+  border-radius: 8px;
+  margin: $spacing-md;
+}

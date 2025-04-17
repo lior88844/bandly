@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { doc, setDoc } from 'firebase/firestore'
 import { db } from '../config/firebase'
 import { getFirebaseErrorMessage } from '../utils/firebaseErrors'
+import { getCoordinatesFromLocation } from '../utils/geocoding'
 import {
   EXPERIENCE_LEVELS,
   GENRES,
@@ -15,9 +16,13 @@ import { LocationAutocomplete } from '../components/LocationAutocomplete'
 
 type SignUpStep = 'credentials' | 'profile' | 'preferences'
 
+interface SignUpFormData extends Partial<UserProfile> {
+  password?: string
+}
+
 export function SignUp() {
   const [step, setStep] = useState<SignUpStep>('credentials')
-  const [formData, setFormData] = useState<Partial<UserProfile>>({
+  const [formData, setFormData] = useState<SignUpFormData>({
     email: '',
     password: '',
     username: '',
@@ -31,7 +36,7 @@ export function SignUp() {
   const navigate = useNavigate()
   const { signUp } = useAuth()
 
-  const updateForm = (fields: Partial<UserProfile>) => {
+  const updateForm = (fields: Partial<SignUpFormData>) => {
     setFormData((prev) => ({ ...prev, ...fields }))
   }
 
@@ -45,36 +50,52 @@ export function SignUp() {
     else if (step === 'profile') setStep('credentials')
   }
 
-  async function handleSubmit(e: React.FormEvent) {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (step !== 'preferences') {
-      handleNext()
-      return
-    }
+    setError('')
+    setLoading(true)
 
     try {
-      setError('')
-      setLoading(true)
-      const { user } = await signUp(formData.email!, formData.password!)
+      if (
+        !formData.email ||
+        !formData.password ||
+        !formData.username ||
+        !formData.instrument ||
+        !formData.experience
+      ) {
+        throw new Error('Please fill in all required fields')
+      }
 
-      const userData: Omit<UserProfile, 'password'> = {
-        username: formData.username!,
-        email: formData.email!,
-        location: formData.location!,
-        instrument: formData.instrument!,
-        experience: formData.experience!,
-        genres: formData.genres!,
+      const coordinates = formData.location
+        ? await getCoordinatesFromLocation(formData.location)
+        : null
+
+      const userData = {
+        id: '', // Will be set by Firebase
+        username: formData.username,
+        email: formData.email,
+        location: formData.location || undefined,
+        coordinates: coordinates || undefined,
+        instrument: formData.instrument,
+        experience: formData.experience,
+        genres: formData.genres ?? [],
         createdAt: new Date().toISOString(),
       }
 
-      await setDoc(doc(db, 'users', user.uid), userData)
-      navigate('/')
+      const { user } = await signUp(formData.email, formData.password)
+      await setDoc(doc(db, 'users', user.uid), {
+        ...userData,
+        id: user.uid,
+      })
+
+      navigate('/search')
     } catch (err) {
-      setError(getFirebaseErrorMessage(err))
-      console.error(err)
-    } finally {
-      setLoading(false)
+      setError(
+        err instanceof Error ? err.message : 'Failed to create an account'
+      )
     }
+
+    setLoading(false)
   }
 
   return (
@@ -132,7 +153,7 @@ export function SignUp() {
               <div className="form__group">
                 <label htmlFor="location">Location</label>
                 <LocationAutocomplete
-                  value={formData.location}
+                  value={formData.location ?? ''}
                   onChange={(value) => updateForm({ location: value })}
                   required
                 />

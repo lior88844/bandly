@@ -14,8 +14,9 @@ import {
   onAuthStateChanged,
 } from 'firebase/auth'
 import { auth } from '../config/firebase'
-import { doc, getDoc } from 'firebase/firestore'
+import { doc, getDoc, onSnapshot } from 'firebase/firestore'
 import { db } from '../config/firebase'
+import { UserProfile } from '../types/user'
 
 interface UserData {
   username: string
@@ -44,10 +45,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(user)
       if (user) {
         // Fetch user data from Firestore
-        const userDoc = await getDoc(doc(db, 'users', user.uid))
-        if (userDoc.exists()) {
-          setUserData(userDoc.data() as UserData)
-        }
+        const userRef = doc(db, 'users', user.uid)
+        const unsubscribe = onSnapshot(userRef, (doc) => {
+          if (doc.exists()) {
+            setUserData({
+              ...doc.data(),
+              id: user.uid,
+            } as UserProfile)
+          }
+        })
+
+        return () => unsubscribe()
       } else {
         setUserData(null)
       }

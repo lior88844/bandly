@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useLoadScript, Autocomplete } from '@react-google-maps/api'
 import '../styles/components/LocationAutocomplete.scss'
 
 interface LocationAutocompleteProps {
@@ -12,44 +13,27 @@ export function LocationAutocomplete({
   onChange,
   required,
 }: LocationAutocompleteProps) {
-  const [loaded, setLoaded] = useState(false)
-  const [error, setError] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null)
+  const [error, setError] = useState(false)
+
+  const { isLoaded, loadError } = useLoadScript({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    libraries: ['places'],
+  })
 
   useEffect(() => {
-    // Check if Google Maps is already loaded
-    if (window.google?.maps) {
-      setLoaded(true)
-      return
-    }
-
-    const script = document.createElement('script')
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${
-      import.meta.env.VITE_GOOGLE_MAPS_API_KEY
-    }&libraries=places`
-    script.async = true
-    script.defer = true
-
-    script.onload = () => setLoaded(true)
-    script.onerror = () => {
+    if (loadError) {
+      console.error('Failed to load Google Maps API')
       setError(true)
     }
-
-    document.head.appendChild(script)
-
-    return () => {
-      if (document.head.contains(script)) {
-        document.head.removeChild(script)
-      }
-    }
-  }, [])
+  }, [loadError])
 
   useEffect(() => {
-    if (!loaded || !inputRef.current || error) return
+    if (!isLoaded || !inputRef.current || error) return
 
     try {
-      autocompleteRef.current = new google.maps.places.Autocomplete(
+      autocompleteRef.current = new window.google.maps.places.Autocomplete(
         inputRef.current,
         {
           types: ['(cities)'],
@@ -67,21 +51,7 @@ export function LocationAutocomplete({
       console.error('Error initializing autocomplete:', err)
       setError(true)
     }
-  }, [loaded, onChange, error])
-
-  // Fallback to simple input if there's an error
-  if (error) {
-    return (
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="Enter your city"
-        required={required}
-        className="location-input"
-      />
-    )
-  }
+  }, [isLoaded, onChange, error])
 
   return (
     <div className="location-autocomplete">
@@ -90,12 +60,18 @@ export function LocationAutocomplete({
         type="text"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={loaded ? 'Start typing a city...' : 'Loading...'}
+        placeholder={isLoaded ? 'Start typing a city...' : 'Loading...'}
         required={required}
-        disabled={!loaded}
+        disabled={!isLoaded}
+        className="location-input"
       />
-      {!loaded && (
+      {!isLoaded && !error && (
         <div className="location-autocomplete__loading">Loading...</div>
+      )}
+      {error && (
+        <div className="location-autocomplete__error">
+          Location service unavailable
+        </div>
       )}
     </div>
   )

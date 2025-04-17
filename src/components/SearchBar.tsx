@@ -9,14 +9,21 @@ interface SearchFilters {
   instrument: string
   location: string
   genre: string
+  distance: number
+  useCurrentLocation: boolean
+  coordinates?: {
+    lat: number
+    lng: number
+  }
 }
 
 interface SearchBarProps {
   onSearch: (filters: SearchFilters) => void
 }
 
-const allInstruments = INSTRUMENTS.map((i) => i.name)
+const allInstruments = INSTRUMENTS.map((instrument) => instrument.toString())
 const allGenres = getAllGenreNames()
+const distanceOptions = [1, 2, 5, 10, 20, 30, 50, 100]
 
 export function SearchBar({ onSearch }: SearchBarProps) {
   const [filters, setFilters] = useState<SearchFilters>({
@@ -24,7 +31,10 @@ export function SearchBar({ onSearch }: SearchBarProps) {
     instrument: '',
     location: '',
     genre: '',
+    distance: 10,
+    useCurrentLocation: false,
   })
+  const [gettingLocation, setGettingLocation] = useState(false)
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -33,6 +43,34 @@ export function SearchBar({ onSearch }: SearchBarProps) {
 
   const updateFilters = (newFilters: Partial<SearchFilters>) => {
     setFilters((prev) => ({ ...prev, ...newFilters }))
+  }
+
+  const getCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      alert('Geolocation is not supported by your browser')
+      return
+    }
+
+    setGettingLocation(true)
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        updateFilters({
+          useCurrentLocation: true,
+          coordinates: {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          },
+        })
+        setGettingLocation(false)
+      },
+      (error) => {
+        console.error('Error getting location:', error)
+        alert(
+          'Unable to get your location. Please try again or enter a location manually.'
+        )
+        setGettingLocation(false)
+      }
+    )
   }
 
   return (
@@ -58,10 +96,43 @@ export function SearchBar({ onSearch }: SearchBarProps) {
           label="Instrument"
         />
 
-        <LocationAutocomplete
-          value={filters.location}
-          onChange={(value) => updateFilters({ location: value })}
-        />
+        <div className="location-filter">
+          <LocationAutocomplete
+            value={filters.location}
+            onChange={(value) =>
+              updateFilters({
+                location: value,
+                useCurrentLocation: false,
+                coordinates: undefined,
+              })
+            }
+          />
+          <button
+            type="button"
+            className="button button--secondary"
+            onClick={getCurrentLocation}
+            disabled={gettingLocation}
+          >
+            {gettingLocation ? 'Getting Location...' : 'Use Current Location'}
+          </button>
+        </div>
+
+        <div className="distance-filter">
+          <label>Distance (km)</label>
+          <select
+            value={filters.distance}
+            onChange={(e) =>
+              updateFilters({ distance: Number(e.target.value) })
+            }
+            className="search-bar__select"
+          >
+            {distanceOptions.map((distance) => (
+              <option key={distance} value={distance}>
+                {distance} km
+              </option>
+            ))}
+          </select>
+        </div>
 
         <Combobox
           value={filters.genre}

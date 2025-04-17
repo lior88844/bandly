@@ -11,77 +11,186 @@ import { SearchBar } from '../components/SearchBar'
 import { UserCard } from '../components/UserCard'
 import { UserProfile } from '../types/user'
 import '../styles/pages/Search.scss'
+import { useAuth } from '../contexts/AuthContext'
+import {
+  calculateDistance,
+  getCoordinatesFromLocation,
+} from '../utils/geocoding'
+import { mockUsers } from '../data/mockData'
 
 interface SearchFilters {
   query: string
   instrument: string
   location: string
   genre: string
+  distance: number
+  useCurrentLocation: boolean
+  coordinates?: {
+    lat: number
+    lng: number
+  }
 }
 
 export function Search() {
   const [users, setUsers] = useState<UserProfile[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const { user } = useAuth()
+  const [useMockData, setUseMockData] = useState(false)
 
   const fetchUsers = async (filters?: SearchFilters) => {
     try {
       setLoading(true)
-      const constraints: QueryConstraint[] = []
 
-      if (filters) {
-        if (filters.instrument) {
-          constraints.push(where('instrument', '==', filters.instrument))
-        }
-        if (filters.genre) {
-          constraints.push(where('genres', 'array-contains', filters.genre))
-        }
-        // Location is handled client-side due to Firestore limitations
-      }
+      // Try to fetch from Firebase first
+      try {
+        const constraints: QueryConstraint[] = []
 
-      const usersRef = collection(db, 'users')
-      const q =
-        constraints.length > 0 ? query(usersRef, ...constraints) : usersRef
-      const querySnapshot = await getDocs(q)
-
-      let usersData = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        username: '',
-        email: '',
-        location: '',
-        instrument: '',
-        experience: '',
-        genres: [],
-        createdAt: '',
-        ...(doc.data() as UserProfile),
-      }))
-
-      // Client-side filtering
-      if (filters) {
-        // Filter by location if specified
-        if (filters.location) {
-          usersData = usersData.filter((user) =>
-            user.location
-              ?.toLowerCase()
-              .includes(filters.location.toLowerCase())
-          )
+        if (filters) {
+          if (filters.instrument) {
+            constraints.push(where('instrument', '==', filters.instrument))
+          }
+          if (filters.genre) {
+            constraints.push(where('genres', 'array-contains', filters.genre))
+          }
         }
 
-        // Filter by search query
-        if (filters.query) {
-          const searchLower = filters.query.toLowerCase()
-          usersData = usersData.filter(
-            (user) =>
-              user.username.toLowerCase().includes(searchLower) ||
-              user.instrument?.toLowerCase().includes(searchLower) ||
-              user.genres?.some((genre) =>
-                genre.toLowerCase().includes(searchLower)
+        const usersRef = collection(db, 'users')
+        const q =
+          constraints.length > 0 ? query(usersRef, ...constraints) : usersRef
+        const querySnapshot = await getDocs(q)
+
+        let usersData = querySnapshot.docs
+          .filter((doc) => doc.id !== user?.uid)
+          .map((doc) => ({
+            ...(doc.data() as UserProfile),
+            id: doc.id,
+          }))
+
+        // Client-side filtering
+        if (filters) {
+          // Get coordinates for location-based filtering if needed
+          let searchCoordinates = filters.coordinates
+          if (filters.location && !filters.useCurrentLocation) {
+            const coords = await getCoordinatesFromLocation(filters.location)
+            if (coords) {
+              searchCoordinates = coords
+            }
+          }
+
+          // Filter by distance if coordinates are available
+          if (searchCoordinates) {
+            usersData = usersData.filter((user) => {
+              if (!user.coordinates) return false
+              const distance = calculateDistance(
+                searchCoordinates!.lat,
+                searchCoordinates!.lng,
+                user.coordinates.lat,
+                user.coordinates.lng
               )
-          )
-        }
-      }
+              return distance <= filters.distance
+            })
+          }
+          // If no coordinates but location is specified, fall back to text-based filtering
+          else if (filters.location) {
+            usersData = usersData.filter((user) =>
+              user.location
+                ?.toLowerCase()
+                .includes(filters.location.toLowerCase())
+            )
+          }
 
-      setUsers(usersData)
+          // Filter by search query
+          if (filters.query) {
+            const searchLower = filters.query.toLowerCase()
+            usersData = usersData.filter(
+              (user) =>
+                user.username.toLowerCase().includes(searchLower) ||
+                user.instrument?.toLowerCase().includes(searchLower) ||
+                user.genres?.some((genre) =>
+                  genre.toLowerCase().includes(searchLower)
+                )
+            )
+          }
+        }
+
+        setUsers(usersData)
+        setUseMockData(false)
+      } catch (firebaseError) {
+        console.error(
+          'Firebase error, falling back to mock data:',
+          firebaseError
+        )
+        setUseMockData(true)
+
+        // Use mock data with the same filtering logic
+        let usersData = [...mockUsers]
+
+        if (filters) {
+          // Filter by instrument
+          if (filters.instrument) {
+            usersData = usersData.filter(
+              (user) =>
+                user.instrument?.toLowerCase() ===
+                filters.instrument.toLowerCase()
+            )
+          }
+
+          // Filter by genre
+          if (filters.genre) {
+            usersData = usersData.filter((user) =>
+              user.genres?.some(
+                (genre) => genre.toLowerCase() === filters.genre.toLowerCase()
+              )
+            )
+          }
+
+          // Filter by location and distance
+          if (filters.location || filters.useCurrentLocation) {
+            let searchCoordinates = filters.coordinates
+            if (filters.location && !filters.useCurrentLocation) {
+              const coords = await getCoordinatesFromLocation(filters.location)
+              if (coords) {
+                searchCoordinates = coords
+              }
+            }
+
+            if (searchCoordinates) {
+              usersData = usersData.filter((user) => {
+                if (!user.coordinates) return false
+                const distance = calculateDistance(
+                  searchCoordinates!.lat,
+                  searchCoordinates!.lng,
+                  user.coordinates.lat,
+                  user.coordinates.lng
+                )
+                return distance <= filters.distance
+              })
+            } else if (filters.location) {
+              usersData = usersData.filter((user) =>
+                user.location
+                  ?.toLowerCase()
+                  .includes(filters.location.toLowerCase())
+              )
+            }
+          }
+
+          // Filter by search query
+          if (filters.query) {
+            const searchLower = filters.query.toLowerCase()
+            usersData = usersData.filter(
+              (user) =>
+                user.username.toLowerCase().includes(searchLower) ||
+                user.instrument?.toLowerCase().includes(searchLower) ||
+                user.genres?.some((genre) =>
+                  genre.toLowerCase().includes(searchLower)
+                )
+            )
+          }
+        }
+
+        setUsers(usersData)
+      }
     } catch (err) {
       console.error('Error fetching users:', err)
       setError('Failed to load users')
@@ -93,7 +202,7 @@ export function Search() {
   // Initial fetch
   useEffect(() => {
     fetchUsers()
-  }, [])
+  }, [user])
 
   const handleSearch = async (filters: SearchFilters) => {
     await fetchUsers(filters)
@@ -102,6 +211,11 @@ export function Search() {
   return (
     <div className="search-page">
       <h1>Find Musicians</h1>
+      {useMockData && (
+        <div className="mock-data-warning">
+          Using mock data - Firebase connection unavailable
+        </div>
+      )}
       <SearchBar onSearch={handleSearch} />
       <div className="search-results">
         {loading ? (

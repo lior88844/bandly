@@ -1,0 +1,142 @@
+@import '../variables';
+
+.header {
+  background-color: rgba($primary-color, 0.95);
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: $spacing-lg $spacing-xl;
+
+  .logo-container {
+    flex: 0 0 auto;
+    margin-right: $spacing-xl;
+    position: relative;
+    z-index: 2;
+  }
+
+  .nav-container {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .nav {
+    display: flex;
+    gap: $spacing-lg;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+
+    &__item {
+      position: relative;
+    }
+
+    &__link {
+      color: $text-primary;
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: $secondary-color;
+      }
+
+      &.active {
+        color: $secondary-color;
+
+        &::after {
+          content: '';
+          position: absolute;
+          bottom: -4px;
+          left: 0;
+          width: 100%;
+          height: 2px;
+          background-color: $secondary-color;
+          border-radius: 2px;
+        }
+      }
+    }
+  }
+
+  .search-form {
+    display: flex;
+    align-items: center;
+    background: rgba($text-primary, 0.1);
+    border-radius: 24px;
+    padding: $spacing-xs;
+    transition: all 0.2s ease;
+    min-width: 300px;
+
+    &:focus-within {
+      background: rgba($text-primary, 0.15);
+      box-shadow: 0 0 0 2px rgba($secondary-color, 0.3);
+    }
+  }
+
+  .search-input {
+    background: none;
+    border: none;
+    color: $text-primary;
+    padding: $spacing-xs $spacing-sm;
+    font-size: $font-size-base;
+    width: 100%;
+    outline: none;
+
+    &::placeholder {
+      color: rgba($text-primary, 0.6);
+    }
+  }
+
+  .search-button {
+    background: none;
+    border: none;
+    padding: $spacing-xs;
+    color: $text-primary;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: $secondary-color;
+    }
+  }
+
+  .search-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  .logo {
+    font-size: $font-size-xl;
+    font-weight: bold;
+    color: $text-primary;
+    text-decoration: none;
+    background: linear-gradient(45deg, $secondary-color, $accent-color);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  }
+
+  .user-menu {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+
+    &__links {
+      display: flex;
+      gap: $spacing-md;
+      align-items: center;
+    }
+
+    &__name {
+      color: $text-primary;
+      font-weight: 500;
+    }
+  }
+}

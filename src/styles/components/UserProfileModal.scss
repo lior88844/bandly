@@ -1,0 +1,146 @@
+@import '../variables';
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(5px);
+}
+
+.modal {
+  background: $primary-color;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  animation: modalEnter 0.3s ease-out;
+  z-index: 10000;
+
+  &__close {
+    position: absolute;
+    top: $spacing-md;
+    right: $spacing-md;
+    background: none;
+    border: none;
+    color: $text-secondary;
+    font-size: 24px;
+    cursor: pointer;
+    padding: $spacing-xs;
+    line-height: 1;
+
+    &:hover {
+      color: $text-primary;
+    }
+  }
+
+  &__content {
+    padding: $spacing-xl;
+  }
+}
+
+.user-profile {
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: $spacing-xl;
+
+    h2 {
+      font-size: $font-size-xl;
+      color: $text-primary;
+    }
+  }
+
+  &__instrument {
+    background: rgba($secondary-color, 0.1);
+    color: $secondary-color;
+    padding: $spacing-xs $spacing-sm;
+    border-radius: 4px;
+    font-size: $font-size-sm;
+  }
+
+  &__info {
+    display: grid;
+    gap: $spacing-lg;
+  }
+
+  .info-group {
+    label {
+      display: block;
+      color: $text-secondary;
+      margin-bottom: $spacing-xs;
+      font-size: $font-size-sm;
+    }
+
+    p {
+      color: $text-primary;
+    }
+  }
+
+  &__genres {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+  }
+
+  .genre-tag {
+    background: rgba($text-primary, 0.1);
+    color: $text-secondary;
+    padding: $spacing-xs $spacing-sm;
+    border-radius: 4px;
+    font-size: $font-size-sm;
+  }
+
+  &__actions {
+    margin-top: $spacing-xl;
+    display: grid;
+    gap: $spacing-md;
+
+    .message-input {
+      width: 100%;
+      min-height: 100px;
+      padding: $spacing-sm;
+      background: rgba($text-primary, 0.1);
+      border: 1px solid rgba($text-primary, 0.2);
+      border-radius: 4px;
+      color: $text-primary;
+      font-size: $font-size-base;
+      resize: vertical;
+
+      &:focus {
+        outline: none;
+        border-color: $secondary-color;
+      }
+    }
+  }
+}
+
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.error-message {
+  color: $error-color;
+  font-size: $font-size-sm;
+  margin-bottom: $spacing-sm;
+  text-align: center;
+  padding: $spacing-xs $spacing-sm;
+  background: rgba($error-color, 0.1);
+  border-radius: 4px;
+}

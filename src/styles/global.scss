@@ -1,16 +1,56 @@
 @import 'variables';
+@import 'components/Header';
 
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  scrollbar-width: thin; // Firefox
+  scrollbar-color: $scrollbar-thumb-color $scrollbar-track-color; // Firefox
+
+  // Chrome, Edge, Safari
+  &::-webkit-scrollbar {
+    width: $scrollbar-width;
+    height: $scrollbar-width;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $scrollbar-track-color;
+    border-radius: $scrollbar-width;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: $scrollbar-thumb-color;
+    border-radius: $scrollbar-width;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+
+    &:hover {
+      background-color: $scrollbar-thumb-hover-color;
+    }
+  }
+
+  // Hide scrollbar when not hovering (optional)
+  &::-webkit-scrollbar-thumb:vertical {
+    min-height: 32px;
+  }
+
+  &::-webkit-scrollbar-thumb:horizontal {
+    min-width: 32px;
+  }
 }
 
 body {
   font-family: $font-family-base;
   background-color: $background-dark;
+  background-image: url('../assets/img/bcg.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   color: $text-primary;
   line-height: 1.5;
+  min-height: 100vh;
 }
 
 .container {
@@ -31,9 +71,24 @@ body {
   &--primary {
     background-color: $secondary-color;
     color: $text-primary;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 
     &:hover {
-      opacity: 0.9;
+      background-color: darken($secondary-color, 10%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  &--secondary {
+    background-color: $accent-color;
+    color: $text-primary;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+    &:hover {
+      background-color: darken($accent-color, 10%);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
     }
   }
 }

@@ -63,6 +63,29 @@
     }
   }
 
+  .location-filter {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+
+    .button {
+      width: 100%;
+      padding: $spacing-xs;
+      font-size: $font-size-sm;
+    }
+  }
+
+  .distance-filter {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+
+    label {
+      color: $text-secondary;
+      font-size: $font-size-sm;
+    }
+  }
+
   @media (max-width: $mobile) {
     &__main {
       flex-direction: column;
@@ -74,6 +97,13 @@
 
     &__filters {
       grid-template-columns: 1fr;
+    }
+
+    .location-filter {
+      .button {
+        padding: $spacing-sm;
+        font-size: $font-size-base;
+      }
     }
   }
 }
